@@ -1,0 +1,240 @@
+/* Shift Watch Later for YouTube
+   - Persistent small corner bookmark badge inside each thumbnail host
+   - Single fixed floating full-thumbnail overlay (portal) so YouTube swapping
+     thumbnails with inline video previews never causes flickering
+   - In-page English toast notification */
+
+/* --- Persistent diagonal top-left corner marker for already-saved videos --- */
+.swl-badge-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1500;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  container-type: size;
+}
+
+.swl-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: min(clamp(34px, 14cqw, 52px), 55cqh);
+  height: min(clamp(34px, 14cqw, 52px), 55cqh);
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+  transform-origin: 0 0;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.65));
+  opacity: 0;
+  transition:
+    opacity 0.08s ease,
+    transform 0.14s cubic-bezier(0.2, 0.85, 0.25, 1),
+    filter 0.14s ease;
+}
+
+.swl-badge-hit {
+  pointer-events: none;
+}
+
+.swl-badge-bg {
+  fill: rgba(255, 255, 255, 0.94);
+  transition: fill 0.12s ease;
+}
+
+.swl-badge-edge {
+  stroke: rgba(0, 0, 0, 0.28);
+  stroke-width: 1.5;
+}
+
+.swl-badge-icon {
+  fill: #141414;
+  transition: fill 0.12s ease;
+}
+
+[data-swl-host][data-swl-on] > .swl-badge-layer > .swl-badge {
+  opacity: 1;
+}
+
+/* Enable hit-testing & tactile lift strictly on the triangular corner when clickable */
+html[data-swl-badge-clickable="true"]
+  [data-swl-host][data-swl-on]:not([data-swl-overlay-active])
+  > .swl-badge-layer
+  > .swl-badge
+  .swl-badge-hit {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+html[data-swl-badge-clickable="true"]
+  [data-swl-host][data-swl-on]:not([data-swl-overlay-active])
+  > .swl-badge-layer
+  > .swl-badge:has(.swl-badge-hit:hover) {
+  transform: scale(1.15);
+  filter: drop-shadow(3px 5px 10px rgba(0, 0, 0, 0.85));
+}
+
+html[data-swl-badge-clickable="true"]
+  [data-swl-host][data-swl-on]:not([data-swl-overlay-active])
+  > .swl-badge-layer
+  > .swl-badge:has(.swl-badge-hit:hover)
+  .swl-badge-bg {
+  fill: #ffffff;
+}
+
+html[data-swl-badge-clickable="true"]
+  [data-swl-host][data-swl-on]:not([data-swl-overlay-active])
+  > .swl-badge-layer
+  > .swl-badge:has(.swl-badge-hit:active) {
+  transform: scale(1.04);
+  filter: drop-shadow(1px 2px 5px rgba(0, 0, 0, 0.72));
+}
+
+/* Hide corner badge & preview controls cleanly under the active floating overlay */
+[data-swl-overlay-active] > .swl-badge-layer > .swl-badge {
+  opacity: 0 !important;
+  transition: none !important;
+}
+
+[data-swl-overlay-active] > .ytdVideoPreviewPlayerControls {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* --- Single fixed floating full-thumbnail overlay (blocks underlying YouTube hover) --- */
+.swl-hover-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 2147483600;
+  pointer-events: none;
+  overflow: hidden;
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(24, 24, 24, 0.56);
+  text-decoration: none;
+  outline: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  will-change: opacity;
+}
+
+.swl-hover-overlay[data-swl-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  backdrop-filter: saturate(0.35);
+}
+
+/* Cutout circular icons (Plus for unsaved, Bookmark for saved) */
+.swl-icon {
+  width: min(clamp(34px, 22cqw, 64px), 62cqh);
+  height: min(clamp(34px, 22cqw, 64px), 62cqh);
+  fill: rgba(255, 255, 255, 0.92);
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.48));
+}
+
+.swl-icon-add {
+  display: block;
+}
+
+.swl-icon-saved {
+  display: none;
+}
+
+.swl-hover-overlay[data-swl-on] > .swl-icon-add {
+  display: none;
+}
+
+.swl-hover-overlay[data-swl-on] > .swl-icon-saved {
+  display: block;
+}
+
+/* Subtle loading feedback during API request */
+.swl-hover-overlay[data-swl-busy] > .swl-icon,
+[data-swl-host][data-swl-busy] > .swl-badge-layer > .swl-badge {
+  animation: swl-pulse 0.7s ease-in-out infinite;
+}
+
+@keyframes swl-pulse {
+  0%, 100% { opacity: 0.95; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.92); }
+}
+
+/* --- In-page stacked toast notifications (no Chrome OS notifications) --- */
+.swl-toast-stack {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 2147483647;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.swl-toast {
+  --swl-y: 0px;
+  --swl-scale: 1;
+  --swl-opacity: 1;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 244px;
+  padding: 10px 20px 10px 14px;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.97);
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.54);
+  backdrop-filter: blur(10px);
+  font-family: "Roboto", "YouTube Sans", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+  transform-origin: center bottom;
+  opacity: var(--swl-opacity);
+  transform: translate(-50%, var(--swl-y)) scale(var(--swl-scale));
+  transition:
+    transform 0.22s cubic-bezier(0.2, 0.85, 0.25, 1),
+    opacity 0.2s ease;
+}
+
+.swl-toast[data-swl-entering="true"] {
+  opacity: 0;
+  transform: translate(-50%, 16px) scale(0.94);
+}
+
+.swl-toast[data-swl-leaving="true"] {
+  opacity: 0 !important;
+  transform: translate(-50%, calc(var(--swl-y) - 10px)) scale(calc(var(--swl-scale) * 0.92));
+  transition:
+    transform 0.2s ease-in,
+    opacity 0.2s ease-in;
+}
+
+.swl-toast-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.swl-toast-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Shift Watch Later for YouTube</title>
+  <meta
+    name="description"
+    content="Privacy Policy for the Shift Watch Later for YouTube Chrome extension."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #0f0f0f;
+      --surface: #171719;
+      --surface-subtle: #1c1c20;
+      --border: #27272c;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --accent: #3ea6ff;
+      --accent-hover: #6cbcff;
+      --code-bg: #202025;
+      --badge-bg: rgba(62, 166, 255, 0.12);
+      --badge-border: rgba(62, 166, 255, 0.32);
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #fafafa;
+        --surface: #ffffff;
+        --surface-subtle: #f4f4f5;
+        --border: #e4e4e7;
+        --text: #18181b;
+        --text-muted: #52525b;
+        --accent: #0969da;
+        --accent-hover: #0550ae;
+        --code-bg: #f1f1f4;
+        --badge-bg: rgba(9, 105, 218, 0.08);
+        --badge-border: rgba(9, 105, 218, 0.25);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 15px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 400;
+      line-height: 1.72;
+      -webkit-font-smoothing: antialiased;
+      padding: 40px 20px 64px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    header.page-header {
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .disclaimer {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      padding: 10px 14px;
+    }
+
+    section {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    section:last-of-type {
+      border-bottom: none;
+    }
+
+    h2 {
+      font-size: 1.12rem;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    p {
+      margin-bottom: 12px;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    ul {
+      padding-left: 1.35rem;
+      margin: 10px 0 12px;
+    }
+
+    ul:last-child {
+      margin-bottom: 0;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    li:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      font-weight: 600;
+    }
+
+    code {
+      font-family: inherit;
+      font-size: 0.88em;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      word-break: break-word;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      word-break: break-word;
+    }
+
+    a:hover {
+      color: var(--accent-hover);
+    }
+
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin: 12px 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 14px 0 6px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 11px 13px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    th {
+      font-weight: 700;
+      background: var(--surface-subtle);
+      white-space: nowrap;
+    }
+
+    footer.page-footer {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px 16px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 24px 16px 48px;
+      }
+
+      h1 {
+        font-size: 1.38rem;
+      }
+
+      th,
+      td {
+        padding: 9px 10px;
+      }
+    }
+
+    @media print {
+      :root {
+        --bg: #ffffff;
+        --surface: #ffffff;
+        --surface-subtle: #f4f4f5;
+        --border: #d4d4d8;
+        --text: #111111;
+        --text-muted: #444444;
+        --accent: #0969da;
+        --code-bg: #f4f4f5;
+      }
+
+      body {
+        padding: 0;
+        font-size: 11pt;
+      }
+
+      a {
+        text-decoration: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="page-header">
+      <span class="eyebrow">Privacy Policy</span>
+      <h1>Shift Watch Later for YouTube</h1>
+      <div class="meta">
+        <span><strong>Effective Date:</strong> November 25, 2026</span>
+        <span><strong>Applies to:</strong> Chrome Extension (Manifest V3)</span>
+      </div>
+      <p class="disclaimer">
+        Shift Watch Later for YouTube is an independent, unofficial browser extension. It is not
+        affiliated with, endorsed by, or sponsored by YouTube or Google LLC.
+      </p>
+    </header>
+
+    <section id="summary">
+      <h2>1. Summary (No Data Collection)</h2>
+      <div class="callout">
+        <p>
+          <strong>Shift Watch Later for YouTube does not collect, transmit, sell, or share any
+          personal or usage data with the developer or any third party.</strong>
+        </p>
+      </div>
+      <p>
+        The extension has no external backend server, no analytics, no telemetry, no advertising SDKs,
+        and no tracking scripts. All functionality runs strictly inside your browser while you use
+        <code>https://www.youtube.com/</code>.
+      </p>
+    </section>
+
+    <section id="data-processed">
+      <h2>2. Data Processed Locally in Your Browser</h2>
+      <p>
+        To add or remove videos from your YouTube Watch Later playlist and display saved-state
+        badges on thumbnails, the extension accesses and processes the following information solely
+        within your browser:
+      </p>
+      <ul>
+        <li>
+          <strong>YouTube Session &amp; Client Configuration:</strong> When you are signed in to
+          YouTube, the extension reads the <code>SAPISID</code> (or <code>__Secure-3PAPISID</code>)
+          cookie from <code>document.cookie</code> and reads YouTube's in-page client configuration
+          (<code>window.ytcfg</code>). These values are used in memory only to compute the
+          <code>SAPISIDHASH</code> authorization header required for same-origin requests to
+          <code>https://www.youtube.com/youtubei/v1/browse</code> and
+          <code>https://www.youtube.com/youtubei/v1/browse/edit_playlist</code>, and to derive a
+          truncated 16-character SHA-1 hash for detecting YouTube account switches locally. Raw
+          cookie values and credentials are never stored or transmitted outside your direct
+          same-origin requests to YouTube.
+        </li>
+        <li>
+          <strong>Watch Later Playlist Identifiers:</strong> The extension reads video IDs
+          (<code>videoId</code>) and playlist entry IDs (<code>setVideoId</code>) from your Watch
+          Later (<code>WL</code>) playlist, and passively observes YouTube's own same-origin
+          <code>edit_playlist</code> requests for <code>playlistId: "WL"</code> so thumbnail badges
+          stay synchronized when you edit Watch Later through YouTube's native UI.
+        </li>
+        <li>
+          <strong>Extension Preferences:</strong> Your chosen click behavior mode
+          (<code>watch_later</code> or <code>open_video</code>) configured in the extension popup.
+        </li>
+      </ul>
+    </section>
+
+    <section id="storage">
+      <h2>3. Local Browser Storage</h2>
+      <p>
+        The extension uses Chrome's built-in storage APIs strictly to persist your preference and to
+        cache Watch Later badges locally across page loads and tabs:
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Storage Area</th>
+              <th>Key</th>
+              <th>Stored Data &amp; Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>chrome.storage.sync</code></td>
+              <td><code>shiftClickAction</code></td>
+              <td>
+                Stores your Invert Controls preference (<code>watch_later</code> or
+                <code>open_video</code>) so it syncs across Chrome profiles where Chrome Sync is
+                enabled.
+              </td>
+            </tr>
+            <tr>
+              <td><code>chrome.storage.local</code></td>
+              <td><code>swl_cache</code></td>
+              <td>
+                Stores a local cache of your Watch Later video ID pairs
+                (<code>videoId</code> / <code>setVideoId</code>), the last sync timestamp
+                (<code>ts</code>), and a 16-character local SHA-1 hash (<code>account</code>) used
+                to clear stale cache entries if you switch YouTube accounts. This data never leaves
+                your device.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="permissions">
+      <h2>4. Permissions &amp; Host Access</h2>
+      <p>
+        Shift Watch Later for YouTube requests only the minimal permissions required to deliver its
+        single purpose:
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Permission / Scope</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>storage</code></td>
+              <td>
+                Reads and writes your click-mode preference in <code>chrome.storage.sync</code> and
+                your local Watch Later badge cache in <code>chrome.storage.local</code>, and listens
+                for <code>chrome.storage.onChanged</code> events to keep open YouTube tabs in sync.
+              </td>
+            </tr>
+            <tr>
+              <td><code>https://www.youtube.com/*</code> (Content Scripts)</td>
+              <td>
+                Injects <code>inject.js</code> (MAIN world) to bridge <code>window.ytcfg</code> and
+                observe native Watch Later edits, and injects <code>content.js</code> and
+                <code>styles.css</code> (ISOLATED world) to handle Shift + Click actions, render
+                thumbnail badges, hover overlays, and in-page toast notifications, and call
+                YouTube's same-origin playlist endpoints. The extension does not run on or access
+                any other website.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="third-party">
+      <h2>5. Third-Party Services &amp; External Links</h2>
+      <p>
+        The extension does not communicate with any third-party servers, APIs, or analytics
+        providers. Network requests initiated by the extension go exclusively to
+        <code>https://www.youtube.com</code> using your existing browser session.
+      </p>
+      <p>
+        The extension popup includes an optional <strong>Sponsor</strong> link pointing to
+        <a
+          href="https://github.com/sponsors/uniunigoduni"
+          target="_blank"
+          rel="noopener noreferrer"
+        >https://github.com/sponsors/uniunigoduni</a>. No data is sent to GitHub unless you
+        explicitly click that link, at which point GitHub's own Privacy Statement applies.
+      </p>
+    </section>
+
+    <section id="retention">
+      <h2>6. Data Retention &amp; Deletion</h2>
+      <p>
+        Because no data is collected on any remote server, you have full control over all data
+        stored by the extension:
+      </p>
+      <ul>
+        <li>
+          Uninstalling the extension from <code>chrome://extensions</code> removes all locally
+          stored cache data (<code>chrome.storage.local</code>) and synced extension settings
+          (<code>chrome.storage.sync</code>).
+        </li>
+        <li>
+          Clearing extension storage via Chrome Developer Tools or signing out / switching YouTube
+          accounts immediately invalidates the local Watch Later cache.
+        </li>
+      </ul>
+    </section>
+
+    <section id="limited-use">
+      <h2>7. Chrome Web Store User Data Policy</h2>
+      <p>
+        The use of information accessed by Shift Watch Later for YouTube adheres strictly to the
+        <a
+          href="https://developer.chrome.com/docs/webstore/program-policies/user-data-faq"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Chrome Web Store User Data Policy</a>, including the Limited Use requirements. Information
+        accessed on YouTube is used solely to provide the user-facing Watch Later toggle and badge
+        functionality and is never transferred, sold, or used for advertising, profiling, or
+        creditworthiness.
+      </p>
+    </section>
+
+    <section id="changes-contact">
+      <h2>8. Changes &amp; Contact</h2>
+      <p>
+        If this Privacy Policy is updated to reflect future changes in the extension, the revised
+        policy will be posted on this page with an updated Effective Date.
+      </p>
+      <p>
+        For questions, feedback, or privacy inquiries regarding Shift Watch Later for YouTube,
+        please contact the developer via GitHub:
+      </p>
+      <ul>
+        <li>
+          GitHub:
+          <a
+            href="https://github.com/uniunigoduni"
+            target="_blank"
+            rel="noopener noreferrer"
+          >https://github.com/uniunigoduni</a>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="page-footer">
+      <span>Shift Watch Later for YouTube</span>
+      <span>Last updated: November 25, 2026</span>
+    </footer>
+  </main>
+</body>
+</html>

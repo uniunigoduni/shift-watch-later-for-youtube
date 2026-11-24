@@ -1,0 +1,7 @@
+# Packaged extension builds
+dist/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
