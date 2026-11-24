@@ -55,11 +55,28 @@
   const BLOCKING_UI_SELECTOR = [
     '#masthead-container',
     'ytd-masthead',
+    '#frosted-glass',
+    '#chips-wrapper',
+    'ytd-feed-filter-chip-bar-renderer',
     'ytd-popup-container',
     'tp-yt-iron-dropdown',
     'tp-yt-paper-dialog',
     'tp-yt-app-drawer[opened]',
+    'ytd-mini-guide-renderer',
     'ytd-miniplayer[active]',
+  ].join(', ');
+  const CARD_BOUNDARY_SELECTOR = [
+    'ytd-rich-item-renderer',
+    'ytd-video-renderer',
+    'ytd-compact-video-renderer',
+    'ytd-grid-video-renderer',
+    'ytd-playlist-panel-video-renderer',
+    'ytd-playlist-video-renderer',
+    'ytd-reel-item-renderer',
+    'ytm-shorts-lockup-view-model-v2',
+    'ytm-shorts-lockup-view-model',
+    'yt-lockup-view-model',
+    'ytd-thumbnail',
   ].join(', ');
 
   /** @type {'watch_later' | 'open_video'} */
@@ -92,13 +109,17 @@
   const mods = { shift: false, ctrl: false, alt: false, meta: false };
   const pointer = { x: -1, y: -1, inside: false };
 
-  // Current single floating overlay state
+  // Current single overlay state (positioned in scroll-container coordinates so it scrolls natively)
   const overlayState = {
     visible: false,
     videoId: null,
     href: '',
     host: null,
-    rect: null,
+    scrollHost: null,
+    relLeft: 0,
+    relTop: 0,
+    width: 0,
+    height: 0,
   };
 
   // ------------------------------------------------------------------ mode & modifiers
@@ -779,45 +800,102 @@
     return layer;
   })();
 
-  // Single fixed floating hover overlay (portal) as a real <a> element:
-  // - pointer-events: auto while visible blocks underlying YouTube hover/preview completely
-  // - real href preserves native middle-click (new tab) and right-click link context menu
+  // Single document/scroll-container anchored hover overlay (portal) as a real <a> element:
+  // - Mounted as position: absolute inside the active scroll container (ytd-app or nested scroller)
+  //   so the browser compositor scrolls it 1:1 with the thumbnail with zero lag
+  // - Outside the video card subtree + pointer-events: auto blocks underlying YouTube hover/preview
+  // - Real href preserves native middle-click (new tab) and right-click link context menu
+  let overlayRootEl = null;
   let hoverOverlayEl = null;
 
-  function getHoverOverlayEl() {
-    if (hoverOverlayEl && hoverOverlayEl.isConnected) return hoverOverlayEl;
+  function getDefaultScrollHost() {
+    return document.querySelector('ytd-app') || document.body || document.documentElement;
+  }
 
-    const el = document.createElement('a');
-    el.className = 'swl-hover-overlay';
-    el.tabIndex = -1;
-    el.draggable = false;
+  function getScrollHostFor(host) {
+    if (!host || !host.isConnected || host.closest('ytd-video-preview')) {
+      return getDefaultScrollHost();
+    }
+    const card = host.closest(CARD_BOUNDARY_SELECTOR);
+    let el = (card || host).parentElement;
+    while (el && el !== document.body && el !== document.documentElement) {
+      if (el.tagName === 'YTD-APP') return el;
+      const style = getComputedStyle(el);
+      const oy = style.overflowY;
+      const ox = style.overflowX;
+      const scrollableY = (oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight;
+      const scrollableX = (ox === 'auto' || ox === 'scroll') && el.scrollWidth > el.clientWidth;
+      if (scrollableY || scrollableX) {
+        return el;
+      }
+      el = el.parentElement;
+    }
+    return getDefaultScrollHost();
+  }
 
-    // Outer circle (r=28 around 32,32) with cutout rounded Plus (evenodd)
-    const addCirclePath =
-      'M32 4 A28 28 0 1 0 32 60 A28 28 0 1 0 32 4 Z ' +
-      'M29 20 A3 3 0 0 1 35 20 V29 H44 A3 3 0 0 1 44 35 H35 V44 A3 3 0 0 1 29 44 V35 H20 A3 3 0 0 1 20 29 H29 Z';
+  function ensureOverlayElements(scrollHost) {
+    const targetScrollHost = scrollHost || getDefaultScrollHost();
 
-    // Outer circle (r=28 around 32,32) with cutout Bookmark (evenodd)
-    const savedCirclePath =
-      'M32 4 A28 28 0 1 0 32 60 A28 28 0 1 0 32 4 Z ' +
-      'M24 18 H40 A3 3 0 0 1 43 21 V46 L32 39.2 L21 46 V21 A3 3 0 0 1 24 18 Z';
+    if (!overlayRootEl) {
+      overlayRootEl = document.createElement('div');
+      overlayRootEl.className = 'swl-overlay-root';
+    }
 
-    el.append(
-      makeSvg('swl-icon swl-icon-add', '0 0 64 64', addCirclePath, 'evenodd'),
-      makeSvg('swl-icon swl-icon-saved', '0 0 64 64', savedCirclePath, 'evenodd')
-    );
+    if (!hoverOverlayEl) {
+      const el = document.createElement('a');
+      el.className = 'swl-hover-overlay';
+      el.tabIndex = -1;
+      el.draggable = false;
 
-    // If cursor exits the overlay directly (e.g. out of viewport or into an iframe), re-evaluate
-    el.addEventListener('pointerleave', (e) => {
-      if (!e.isTrusted) return;
-      pointer.x = e.clientX;
-      pointer.y = e.clientY;
-      refreshHoverOverlay();
-    });
+      // Outer circle (r=28 around 32,32) with cutout rounded Plus (evenodd)
+      const addCirclePath =
+        'M32 4 A28 28 0 1 0 32 60 A28 28 0 1 0 32 4 Z ' +
+        'M29 20 A3 3 0 0 1 35 20 V29 H44 A3 3 0 0 1 44 35 H35 V44 A3 3 0 0 1 29 44 V35 H20 A3 3 0 0 1 20 29 H29 Z';
 
-    (document.documentElement || document.body).appendChild(el);
-    hoverOverlayEl = el;
-    return el;
+      // Outer circle (r=28 around 32,32) with cutout Bookmark (evenodd)
+      const savedCirclePath =
+        'M32 4 A28 28 0 1 0 32 60 A28 28 0 1 0 32 4 Z ' +
+        'M24 18 H40 A3 3 0 0 1 43 21 V46 L32 39.2 L21 46 V21 A3 3 0 0 1 24 18 Z';
+
+      el.append(
+        makeSvg('swl-icon swl-icon-add', '0 0 64 64', addCirclePath, 'evenodd'),
+        makeSvg('swl-icon swl-icon-saved', '0 0 64 64', savedCirclePath, 'evenodd')
+      );
+
+      // If cursor exits the overlay directly (e.g. out of viewport or into an iframe), re-evaluate
+      el.addEventListener('pointerleave', (e) => {
+        if (!e.isTrusted) return;
+        pointer.x = e.clientX;
+        pointer.y = e.clientY;
+        refreshHoverOverlay();
+      });
+
+      hoverOverlayEl = el;
+      overlayRootEl.appendChild(el);
+    } else if (hoverOverlayEl.parentElement !== overlayRootEl) {
+      overlayRootEl.appendChild(hoverOverlayEl);
+    }
+
+    if (
+      targetScrollHost !== document.body &&
+      targetScrollHost !== document.documentElement &&
+      targetScrollHost.tagName !== 'YTD-APP' &&
+      getComputedStyle(targetScrollHost).position === 'static'
+    ) {
+      targetScrollHost.style.position = 'relative';
+    }
+
+    if (overlayRootEl.parentElement !== targetScrollHost) {
+      targetScrollHost.appendChild(overlayRootEl);
+    }
+
+    return { rootEl: overlayRootEl, el: hoverOverlayEl, scrollHost: targetScrollHost };
+  }
+
+  function getLiveOverlayViewportRect() {
+    if (!overlayState.visible || !hoverOverlayEl || !hoverOverlayEl.isConnected) return null;
+    const r = hoverOverlayEl.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 ? r : null;
   }
 
   // ------------------------------------------------------------------ thumbnail detection
@@ -882,16 +960,16 @@
     const stack = document.elementsFromPoint(x, y);
     if (!stack.length) return null;
 
-    // Skip our own floating overlay/toast to find the top-most real YouTube element
+    // Skip our own overlay/toast elements to find the top-most real YouTube element
     const topReal = stack.find(
-      (el) => !el.closest('.swl-hover-overlay, .swl-toast-stack, .swl-toast')
+      (el) => !el.closest('.swl-overlay-root, .swl-hover-overlay, .swl-toast-stack, .swl-toast')
     );
     if (!topReal || topReal.closest(BLOCKING_UI_SELECTOR)) return null;
 
     let sawPreviewWithoutHref = false;
 
     for (const el of stack) {
-      if (el.closest('.swl-hover-overlay, .swl-toast-stack, .swl-toast')) {
+      if (el.closest('.swl-overlay-root, .swl-hover-overlay, .swl-toast-stack, .swl-toast')) {
         continue;
       }
 
@@ -951,7 +1029,7 @@
           videoId: overlayState.videoId,
           href: overlayState.href,
           host: overlayState.host,
-          rect: overlayState.rect,
+          rect: getLiveOverlayViewportRect(),
         };
       }
       if (target.closest(BLOCKING_UI_SELECTOR)) return null;
@@ -961,15 +1039,16 @@
       const hit = findThumbAtPoint(clientX, clientY);
       if (hit && hit.videoId) return hit;
       // During a 1-frame preview swap right under the cursor, trust the active overlay
+      const liveRect = getLiveOverlayViewportRect();
       if (
         overlayState.visible &&
         overlayState.videoId &&
-        pointInRect(clientX, clientY, overlayState.rect)
+        pointInRect(clientX, clientY, liveRect)
       ) {
         return {
           videoId: overlayState.videoId,
           host: overlayState.host,
-          rect: overlayState.rect,
+          rect: liveRect,
         };
       }
     }
@@ -1010,13 +1089,6 @@
       if (br && br !== '0px') return br;
     }
     return '0px';
-  }
-
-  function getHeaderBottom() {
-    const masthead = document.getElementById('masthead-container');
-    if (!masthead) return 0;
-    const r = masthead.getBoundingClientRect();
-    return r.height > 0 && r.bottom > 0 ? r.bottom : 0;
   }
 
   function clearActiveHostMarkers() {
@@ -1098,7 +1170,11 @@
     overlayState.videoId = null;
     overlayState.href = '';
     overlayState.host = null;
-    overlayState.rect = null;
+    overlayState.scrollHost = null;
+    overlayState.relLeft = 0;
+    overlayState.relTop = 0;
+    overlayState.width = 0;
+    overlayState.height = 0;
     clearActiveHostMarkers();
     if (hoverOverlayEl) {
       hoverOverlayEl.removeAttribute('data-swl-visible');
@@ -1109,16 +1185,21 @@
   }
 
   function showHoverOverlay(videoId, href, host, rect) {
-    const el = getHoverOverlayEl();
+    const scrollHost = getScrollHostFor(host);
+    const { rootEl, el } = ensureOverlayElements(scrollHost);
+    const rootRect = rootEl.getBoundingClientRect();
+
+    const relLeft = rect.left - rootRect.left;
+    const relTop = rect.top - rootRect.top;
 
     const sameSpot =
       overlayState.visible &&
       overlayState.videoId === videoId &&
-      overlayState.rect &&
-      Math.abs(overlayState.rect.left - rect.left) < 1 &&
-      Math.abs(overlayState.rect.top - rect.top) < 1 &&
-      Math.abs(overlayState.rect.width - rect.width) < 1 &&
-      Math.abs(overlayState.rect.height - rect.height) < 1;
+      overlayState.scrollHost === scrollHost &&
+      Math.abs(overlayState.relLeft - relLeft) < 1 &&
+      Math.abs(overlayState.relTop - relTop) < 1 &&
+      Math.abs(overlayState.width - rect.width) < 1 &&
+      Math.abs(overlayState.height - rect.height) < 1;
 
     const resolvedHref = href || `${ORIGIN}/watch?v=${videoId}`;
 
@@ -1126,21 +1207,23 @@
     overlayState.videoId = videoId;
     overlayState.href = resolvedHref;
     overlayState.host = host;
-    overlayState.rect = rect;
+    overlayState.scrollHost = scrollHost;
 
     if (el.href !== resolvedHref) {
       el.href = resolvedHref;
     }
 
     if (!sameSpot) {
-      const headerBottom = getHeaderBottom();
-      const topClip = Math.max(0, headerBottom - rect.top);
-      el.style.left = `${rect.left}px`;
-      el.style.top = `${rect.top}px`;
+      overlayState.relLeft = relLeft;
+      overlayState.relTop = relTop;
+      overlayState.width = rect.width;
+      overlayState.height = rect.height;
+
+      el.style.left = `${relLeft}px`;
+      el.style.top = `${relTop}px`;
       el.style.width = `${rect.width}px`;
       el.style.height = `${rect.height}px`;
       el.style.borderRadius = resolveBorderRadius(host);
-      el.style.clipPath = topClip > 0 ? `inset(${topClip}px 0 0 0)` : '';
       markActiveHosts(videoId, rect);
     } else if (host && !host.hasAttribute('data-swl-overlay-active')) {
       host.setAttribute('data-swl-overlay-active', '');
@@ -1169,11 +1252,12 @@
     const hit = findThumbAtPoint(pointer.x, pointer.y);
     if (!hit) {
       // If YouTube is closing an active preview and momentarily hiding the thumbnail under our overlay,
-      // hold steady as long as cursor remains inside the current thumbnail rect.
-      if (overlayState.visible && pointInRect(pointer.x, pointer.y, overlayState.rect)) {
+      // hold steady as long as cursor remains inside the live overlay rect.
+      const liveRect = getLiveOverlayViewportRect();
+      if (overlayState.visible && pointInRect(pointer.x, pointer.y, liveRect)) {
         const stack = document.elementsFromPoint(pointer.x, pointer.y);
         const under = stack.find(
-          (el) => !el.closest('.swl-hover-overlay, .swl-toast-stack, .swl-toast')
+          (el) => !el.closest('.swl-overlay-root, .swl-hover-overlay, .swl-toast-stack, .swl-toast')
         );
         if (under && under.closest('ytd-thumbnail, yt-thumbnail-view-model, ytd-video-preview, [data-ytd-video-preview-hit-box]')) {
           return;
@@ -1184,7 +1268,8 @@
     }
 
     if (hit.transitioningPreview) {
-      if (overlayState.visible && pointInRect(pointer.x, pointer.y, overlayState.rect)) {
+      const liveRect = getLiveOverlayViewportRect();
+      if (overlayState.visible && pointInRect(pointer.x, pointer.y, liveRect)) {
         return;
       }
       hideHoverOverlay();
@@ -1576,6 +1661,7 @@
         if (node.nodeType !== 1) continue;
         if (
           node.classList.contains('swl-badge-layer') ||
+          node.classList.contains('swl-overlay-root') ||
           node.classList.contains('swl-hover-overlay') ||
           node.classList.contains('swl-toast-stack') ||
           node.classList.contains('swl-toast')

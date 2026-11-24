@@ -8,7 +8,7 @@
 .swl-badge-layer {
   position: absolute;
   inset: 0;
-  z-index: 1500;
+  z-index: 200;
   pointer-events: none;
   overflow: hidden;
   border-radius: inherit;
@@ -101,18 +101,28 @@ html[data-swl-badge-clickable="true"]
   pointer-events: none !important;
 }
 
-/* --- Single fixed floating full-thumbnail overlay (blocks underlying YouTube hover) --- */
-.swl-hover-overlay {
-  position: fixed;
+/* --- Scroll-synced full-thumbnail overlay (moves 1:1 with page/container scroll) --- */
+.swl-overlay-root {
+  position: absolute;
   top: 0;
   left: 0;
   width: 0;
   height: 0;
-  z-index: 2147483600;
+  z-index: 1990;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.swl-hover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
   pointer-events: none;
   overflow: hidden;
   container-type: size;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   background: rgba(24, 24, 24, 0.56);
@@ -121,14 +131,10 @@ html[data-swl-badge-clickable="true"]
   user-select: none;
   -webkit-user-drag: none;
   cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  will-change: opacity;
 }
 
 .swl-hover-overlay[data-swl-visible="true"] {
-  opacity: 1;
-  visibility: visible;
+  display: flex;
   pointer-events: auto;
   backdrop-filter: saturate(0.35);
 }
