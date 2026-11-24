@@ -20,6 +20,7 @@ Quickly add or remove YouTube videos from your Watch Later playlist by Shift + L
 - No external servers, analytics, telemetry, or third-party tracking.
 - All Watch Later requests go directly from your browser to `https://www.youtube.com` using your existing YouTube session.
 - Extension settings and a local Watch Later badge cache are stored strictly in Chrome's built-in extension storage (`chrome.storage.sync` and `chrome.storage.local`).
+- Privacy Policy: https://uniunigoduni.github.io/shift-watch-later-for-youtube/
 
 ---
 
