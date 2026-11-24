@@ -32,9 +32,11 @@
   const PREVIEW_HOST_SELECTOR =
     '.ytdVideoPreviewMediaContainer, .ytdVideoPreviewVideoPreviewContainer, #video-preview-container';
   const THUMB_CONTENT_SELECTOR =
-    'img, yt-image, yt-thumbnail-view-model, .shortsLockupViewModelHostThumbnailContainer';
+    'img:not(.emoji):not(.small-emoji), yt-image, yt-thumbnail-view-model, .shortsLockupViewModelHostThumbnailContainer';
   const THUMB_SUBHOST_SELECTOR =
-    'yt-thumbnail-view-model, .shortsLockupViewModelHostThumbnailContainer';
+    'yt-thumbnail-view-model, .shortsLockupViewModelHostThumbnailContainer, ytd-thumbnail';
+  const TITLE_LINK_SELECTOR =
+    'a#video-title, a#video-title-link, a.ytLockupMetadataViewModelTitle, a.yt-lockup-metadata-view-model__title';
   const EXCLUDED_ANCESTOR_SELECTOR = [
     'ytd-guide-entry-renderer',
     'ytd-mini-guide-entry-renderer',
@@ -42,6 +44,11 @@
     'ytd-notification-renderer',
     'ytd-comment-view-model',
     'ytd-comment-renderer',
+    'ytd-macro-markers-list-item-renderer',
+    'ytd-macro-markers-list-renderer',
+    'ytd-engagement-panel-section-list-renderer[target-id*="macro-markers"]',
+    'ytd-engagement-panel-section-list-renderer[target-id*="chapters"]',
+    'ytd-expandable-metadata-renderer',
     '#shorts-player',
     'ytd-reel-player-overlay-renderer',
   ].join(', ');
@@ -827,6 +834,8 @@
 
   function resolveThumbInfo(anchor) {
     if (!(anchor instanceof HTMLAnchorElement)) return null;
+    if (anchor.id === 'wc-endpoint' || anchor.matches(TITLE_LINK_SELECTOR)) return null;
+
     const videoId = extractVideoIdFromHref(anchor.getAttribute('href'));
     if (!videoId) return null;
 
@@ -842,6 +851,9 @@
       const previewHost = anchor.closest(PREVIEW_HOST_SELECTOR) || anchor;
       return { videoId, href: anchor.href, host: previewHost, isPreview: true };
     }
+
+    // Ignore outer wrapper anchors (e.g. playlist panel rows) that wrap an inner thumbnail link
+    if (anchor.querySelector(THUMB_LINK_SELECTOR)) return null;
 
     if (!anchor.querySelector(THUMB_CONTENT_SELECTOR)) {
       return null;
