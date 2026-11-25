@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Shift Watch Later for YouTube",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Quickly add or remove YouTube videos from Watch Later by Shift + Left Clicking thumbnails.",
   "permissions": ["storage"],
   "action": {
